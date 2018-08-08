@@ -1,0 +1,16 @@
+{% extends "layout.html.twig" %}
+
+{% block content %} 
+    <div class="container">
+        <div class="row">
+            {{ 'Newst newst of them all' }}
+            <div class="column">
+            {% for result in results %}
+               <div class="table">
+                    {{ result['title'] }}
+                </div>
+            {% endfor %}    
+            </div>
+        </div>
+    </div>
+{% endblock %}

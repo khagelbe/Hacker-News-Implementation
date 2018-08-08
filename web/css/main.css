@@ -1,0 +1,11 @@
+.table {
+    background-color: lightgray;
+}
+#navbar-color {
+    background-color: #ff8533;
+}
+
+#logo a {
+    border: 1px;
+    border-color: black;
+}
