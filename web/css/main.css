@@ -1,8 +1,17 @@
 .table {
-    background-color: lightgray;
+    margin-left: 15px;
+    margin-right: 15px;
+    
+}
+#ask {
+    overflow:auto;
+    background-color: #f2f2f2;
+    width: 600px;
+    height:600px;
+    margin: 20px auto;
 }
 #navbar-color {
-    background-color: #ff8533;
+    background-color: #4ABDAC;
 }
 
 #logo a {

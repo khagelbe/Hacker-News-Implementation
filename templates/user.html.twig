@@ -1,0 +1,41 @@
+{% extends "layout.html.twig" %}
+
+{% block content %}
+    <div id="ask">
+    {% if result is empty %}
+        <div>
+            No user data available
+        </div>  
+            
+    {% else %}        
+        <table>
+        <tr>
+            <td>
+                
+            </td>
+            <td>
+                {{ result['karma'] }}
+            </td>    
+        </tr> 
+        <tr>
+            <td>
+                {{ result['karma'] }}
+            </td>    
+        </tr> 
+        <tr>
+            <td>
+                {{ result['karma'] }}
+            </td>    
+        </tr> 
+        <tr>
+            <td>
+                {{ result['karma'] }}
+            </td>    
+        </tr>  
+        <div>  
+            {{ result['created'] }}
+        </div> 
+        </table>         
+    </div>    
+    {% endif %}
+{% endblock %}

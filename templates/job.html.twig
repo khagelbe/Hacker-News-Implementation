@@ -1,16 +1,16 @@
 {% extends "layout.html.twig" %}
 
 {% block content %} 
-    <div class="container">
-        <div class="row">
-            {{ 'Newst newst of them all' }}
-            <div class="column">
+    <table id="jobs" class="table table-bordred table-striped">
+        <tbody>
             {% for result in results %}
-               <div class="table">
-                    {{ result['title'] }}
-                </div>
-            {% endfor %}    
-            </div>
-        </div>
-    </div>
+                <tr>
+                    <td></td>
+                    <td>
+                        <a href="{{ result['url'] }}">{{ result['title'] }}</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}

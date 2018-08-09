@@ -48,6 +48,25 @@ class ApiCallManager
         return $this->getDetails($showStoryArray);
     }
 
+    /**
+     * Fetches info about ask
+     */
+    public function getAskDetails(string $itemId): array
+    {
+        $str = file_get_contents(sprintf('https://hacker-news.firebaseio.com/v0/item/%s.json', $itemId));
+        return $this->jsonDecode($str);
+    }
+
+    /**
+     * Fetches user info
+     */
+    public function getUserInfo(string $userId): ?array
+    {
+        $str = file_get_contents(sprintf('https://hacker-news.firebaseio.com/v0/user/%s.json', $userId));
+        
+        return $this->jsonDecode($str);       
+    }
+
     /** 
      * Gets all new storiy ids from Hacker News 
      * 
@@ -55,8 +74,7 @@ class ApiCallManager
     private function getNewStories(): array
     {      
         $str = file_get_contents('https://hacker-news.firebaseio.com/v0/newstories.json');
-        $arr = json_decode($str, true);
-        return $arr;
+        return $this->jsonDecode($str);
     }
 
     /** 
@@ -66,8 +84,7 @@ class ApiCallManager
     private function getTopStories(): array
     {
         $str = file_get_contents('https://hacker-news.firebaseio.com/v0/topstories.json');
-        $arr = json_decode($str, true);
-        return $arr;
+        return $this->jsonDecode($str);
     }
 
     /** 
@@ -77,8 +94,7 @@ class ApiCallManager
     private function getBestStories(): array
     {
         return file_get_contents('https://hacker-news.firebaseio.com/v0/beststories.json');
-        $arr = json_decode($str, true);
-        return $arr;
+        return $this->jsonDecode($str);
     }
 
     /** 
@@ -87,8 +103,7 @@ class ApiCallManager
     private function getAskStories(): array
     {      
         $str = file_get_contents('https://hacker-news.firebaseio.com/v0/askstories.json');
-        $arr = json_decode($str, true);
-        return $arr;
+        return $this->jsonDecode($str);
     }
 
     /** 
@@ -97,8 +112,7 @@ class ApiCallManager
     private function getShowStories(): array
     {      
         $str = file_get_contents('https://hacker-news.firebaseio.com/v0/showstories.json');
-        $arr = json_decode($str, true);
-        return $arr;
+        return $this->jsonDecode($str);
     }
 
     /** 
@@ -107,15 +121,13 @@ class ApiCallManager
     private function getJobStories(): array
     {      
         $str = file_get_contents('https://hacker-news.firebaseio.com/v0/jobstories.json');
-        $arr = json_decode($str, true);
-        return $arr;
+        return $this->jsonDecode($str);
     }
 
     private function getUser($userId): array
     {      
         $str = file_get_contents(sprintf('https://hacker-news.firebaseio.com/v0/user/%s.json', $userId));
-        $arr = json_decode($str, true);
-        return $arr;
+        return $this->jsonDecode($str);
     }
 
     /**
@@ -139,5 +151,13 @@ class ApiCallManager
         }
 
         return $resultArray;
+    }
+
+    /**
+     * Decodes json string to array
+     */
+    private function jsonDecode(string $str): ?array
+    {
+        return json_decode($str, true);
     }
 }

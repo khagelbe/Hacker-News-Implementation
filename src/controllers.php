@@ -13,6 +13,16 @@ $app->get('/', function () use ($app) {
 })
 ->bind('homepage');
 
+// define controllers for one ask details
+$asking = $app['controllers_factory'];
+$asking->get('/', function ($id) use ($app) {
+    $result = new ApiCallManager();
+    return $app['twig']->render('ask_read.html.twig', array(
+        'result' => $result->getAskDetails($id)
+    ));
+})
+->bind('asking');
+
 // define controllers for story
 $story = $app['controllers_factory'];
 $story->get('/', function () use ($app) {
@@ -60,22 +70,21 @@ $show->get('/', function () use ($app) {
 
 // Defines controllers for user
 $user = $app['controllers_factory'];
-$user->get('/', function () use ($app) {
+$user->get('/', function ($id) use ($app) {
     $result = new ApiCallManager();
     return $app['twig']->render('user.html.twig', array(
-        'results' => $result->listAllNewStories()
+        'result' => $result->getUserInfo($id)
     ));
-});
+})
+->bind('user');
 
 $app->mount('/story', $story);
 $app->mount('/comment', $comment);
 $app->mount('/job', $job);
 $app->mount('/ask', $ask);
 $app->mount('/show', $show);
-$app->mount('/user', $user);
-
-
-
+$app->mount('/user/{id}', $user);
+$app->mount('/asking/{id}', $asking);
 
 $app->error(function (\Exception $e, Request $request, $code) use ($app) {
     if ($app['debug']) {
