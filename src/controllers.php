@@ -13,39 +13,65 @@ $app->get('/', function () use ($app) {
 })
 ->bind('homepage');
 
-// define controllers for a story page
+// define controllers for story
 $story = $app['controllers_factory'];
 $story->get('/', function () use ($app) {
-    $result = new APIStuff();
+    $result = new ApiCallManager();
     return $app['twig']->render('story.html.twig', array(
         'results' => $result->listAllNewStories()
     ));
 });
 
+// Define controllers for comment
 $comment = $app['controllers_factory'];
 $comment->get('/', function () use ($app) {
-    return $app['twig']->render('comment.html.twig', array());
+    $result = new ApiCallManager();
+    return $app['twig']->render('comment.html.twig', array(
+        'results' => $result->listAllNewStories()
+    ));
 });
 
+// Define controllers for job
 $job = $app['controllers_factory'];
 $job->get('/', function () use ($app) {
-    return $app['twig']->render('job.html.twig', array());
+    $result = new ApiCallManager();
+    return $app['twig']->render('job.html.twig', array(
+        'results' => $result->listAllJobs()
+    ));
 });
 
-$poll = $app['controllers_factory'];
-$poll->get('/', function () use ($app) {
-    return $app['twig']->render('poll.html.twig', array());
+// Define controllers for ask stories
+$ask = $app['controllers_factory'];
+$ask->get('/', function () use ($app) {
+    $result = new ApiCallManager();
+    return $app['twig']->render('ask.html.twig', array(
+        'results' => $result->listAllAskStories()
+    ));
 });
 
+// Define controllers for show stories
+$show = $app['controllers_factory'];
+$show->get('/', function () use ($app) {
+    $result = new ApiCallManager();
+    return $app['twig']->render('show.html.twig', array(
+        'results' => $result->listAllShowStories()
+    ));
+});
+
+// Defines controllers for user
 $user = $app['controllers_factory'];
 $user->get('/', function () use ($app) {
-    return $app['twig']->render('user.html.twig', array());
+    $result = new ApiCallManager();
+    return $app['twig']->render('user.html.twig', array(
+        'results' => $result->listAllNewStories()
+    ));
 });
 
 $app->mount('/story', $story);
 $app->mount('/comment', $comment);
 $app->mount('/job', $job);
-$app->mount('/poll', $poll);
+$app->mount('/ask', $ask);
+$app->mount('/show', $show);
 $app->mount('/user', $user);
 
 
