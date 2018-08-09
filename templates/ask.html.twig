@@ -8,6 +8,17 @@
                     <td></td>
                     <td>
                         <a href="{{ url('asking', {id: result['id'] }) }}">{{ result['title'] }}</a>
+                        <div id="small-text">
+                            {{ result['score'] }} point by 
+                            <a href="{{ url('user', {id: result['id'] }) }}">{{ result['by'] }}</a>
+                            | {{ (result['time'] | date) |time_diff}}
+                            | web |
+                            {% if result['descendants'] == 0 %}
+                                discuss
+                            {% else %}    
+                                {{ result['descendants'] }} comments
+                            {% endif %}    
+                        </div>
                     </td>
                 </tr>
             {% endfor %}

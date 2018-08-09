@@ -1,8 +1,20 @@
 .table {
     margin-left: 15px;
     margin-right: 15px;
-    
 }
+
+.navbar-default .navbar-nav>li>a {
+    color: #d1e0e0;
+}
+
+.navbar-default .navbar-nav>li>a {
+    color: black;
+}
+
+#small-text {
+    font-size: small;
+}
+
 #ask {
     overflow:auto;
     background-color: #f2f2f2;
@@ -10,8 +22,9 @@
     height:600px;
     margin: 20px auto;
 }
+
 #navbar-color {
-    background-color: #4ABDAC;
+    background-color: #209682;
 }
 
 #logo a {

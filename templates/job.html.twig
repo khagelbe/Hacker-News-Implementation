@@ -4,12 +4,23 @@
     <table id="jobs" class="table table-bordred table-striped">
         <tbody>
             {% for result in results %}
-                <tr>
-                    <td></td>
-                    <td>
-                        <a href="{{ result['url'] }}">{{ result['title'] }}</a>
-                    </td>
-                </tr>
+                {% if result['url'] is defined %}
+                    <tr>
+                        <td></td>
+                        <td>
+                            <a href="{{ result['url'] }}">{{ result['title'] }}</a>
+                            <div id="small-text">{{ (result['time'] | date) |time_diff}}</div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td></td>
+                        <td>
+                            {{ result['title'] }}
+                            <div id="small-text">2 hours ago</div>
+                        </td>
+                    </tr>    
+                {% endif %}    
             {% endfor %}
         </tbody>
     </table>
