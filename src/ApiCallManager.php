@@ -4,10 +4,20 @@ class ApiCallManager
 
 // Loading takes too much time. Fix it.
 {  
+    // Number of item shown in one page
+    const NO_OF_ITEMS = 25;
+
+    public function createPagination()
+    {
+        $page = $_GET['page'];
+        $offset = ($page-1) * self::NO_OF_ITEMS;
+        $totalNuberOfPages = $totalNumberOfPages / self::NO_OF_ITEMS;
+    }
+
     /**
      * Lists all new stories in detail
      */
-    public function listAllNewStories(): array
+    public function listAllNewStories($page): array
     {
         $resultArray = [];
         $newsArray = $this->getNewStories();    
@@ -74,27 +84,19 @@ class ApiCallManager
     private function getNewStories(): array
     {      
         $str = file_get_contents('https://hacker-news.firebaseio.com/v0/newstories.json');
-        return $this->jsonDecode($str);
-    }
 
-    /** 
-     * Gets all top story ids from Hacker News 
-     * 
-     */
-    private function getTopStories(): array
-    {
-        $str = file_get_contents('https://hacker-news.firebaseio.com/v0/topstories.json');
-        return $this->jsonDecode($str);
-    }
+        $arr = $this->jsonDecode($str);
 
-    /** 
-     * Gets all best story ids from Hacker News 
-     * 
-     */
-    private function getBestStories(): array
-    {
-        return file_get_contents('https://hacker-news.firebaseio.com/v0/beststories.json');
-        return $this->jsonDecode($str);
+        $i = 0;
+        
+        foreach($arr as $item) {
+            $resultArray[] = $item;
+            $i++;
+
+            if ($i>= self::NO_OF_ITEMS) {
+                return $resultArray;
+            }
+        }
     }
 
     /** 
@@ -135,19 +137,10 @@ class ApiCallManager
      */
     private function getDetails($arr): array
     {
-        // This $i is here just for testing purposes 
-        // because getting result takes too much time and 
-        // causes performance problems
-        $i = 0;
         foreach ($arr as $itemId) {
             
             $str = file_get_contents(sprintf('https://hacker-news.firebaseio.com/v0/item/%s.json', $itemId)); 
             $resultArray[] = json_decode($str, true);
-            $i++;
-            
-            if ($i >= 10) {
-                return $resultArray;
-            }
         }
 
         return $resultArray;

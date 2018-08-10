@@ -25,46 +25,48 @@ $asking->get('/', function ($id) use ($app) {
 
 // define controllers for story
 $story = $app['controllers_factory'];
-$story->get('/', function () use ($app) {
+$story->get('/', function (Request $request) use ($app) {
     $result = new ApiCallManager();
+    $page = $request->query->getInt('page', 1);
     return $app['twig']->render('story.html.twig', array(
-        'results' => $result->listAllNewStories()
+        'results' => $result->listAllNewStories($page)
     ));
-});
+})
+->bind('story');
 
 // Define controllers for comment
 $comment = $app['controllers_factory'];
-$comment->get('/', function () use ($app) {
+$comment->get('/', function ($page) use ($app) {
     $result = new ApiCallManager();
     return $app['twig']->render('comment.html.twig', array(
-        'results' => $result->listAllNewStories()
+        'results' => $result->listAllNewStories($page)
     ));
 });
 
 // Define controllers for job
 $job = $app['controllers_factory'];
-$job->get('/', function () use ($app) {
+$job->get('/', function ($page) use ($app) {
     $result = new ApiCallManager();
     return $app['twig']->render('job.html.twig', array(
-        'results' => $result->listAllJobs()
+        'results' => $result->listAllJobs($page)
     ));
 });
 
 // Define controllers for ask stories
 $ask = $app['controllers_factory'];
-$ask->get('/', function () use ($app) {
+$ask->get('/', function ($page) use ($app) {
     $result = new ApiCallManager();
     return $app['twig']->render('ask.html.twig', array(
-        'results' => $result->listAllAskStories()
+        'results' => $result->listAllAskStories($page)
     ));
 });
 
 // Define controllers for show stories
 $show = $app['controllers_factory'];
-$show->get('/', function () use ($app) {
+$show->get('/', function ($page) use ($app) {
     $result = new ApiCallManager();
     return $app['twig']->render('show.html.twig', array(
-        'results' => $result->listAllShowStories()
+        'results' => $result->listAllShowStories($page)
     ));
 });
 
@@ -78,11 +80,11 @@ $user->get('/', function ($id) use ($app) {
 })
 ->bind('user');
 
-$app->mount('/story', $story);
-$app->mount('/comment', $comment);
-$app->mount('/job', $job);
-$app->mount('/ask', $ask);
-$app->mount('/show', $show);
+$app->mount('/story/{$page}', $story);
+$app->mount('/comment/{$page}', $comment);
+$app->mount('/job/{$page}', $job);
+$app->mount('/ask/{$page}', $ask);
+$app->mount('/show/{$page}', $show);
 $app->mount('/user/{id}', $user);
 $app->mount('/asking/{id}', $asking);
 
