@@ -13,84 +13,85 @@ $app->get('/', function () use ($app) {
 })
 ->bind('homepage');
 
-// define controllers for one ask details
+// define controllers for one question
 $asking = $app['controllers_factory'];
 $asking->get('/', function ($id) use ($app) {
-    $result = new ApiCallManager();
+    $apiManager = new ApiCallManager();
     return $app['twig']->render('question.html.twig', array(
-        'result' => $result->getAskDetails($id)
+        'result' => $apiManager->getAskDetails($id)
     ));
 })
 ->bind('asking');
 
-// define controllers for story
+// define controllers for new story page
 $story = $app['controllers_factory'];
 $story->get('/', function (Request $request) use ($app) {
-    $result = new ApiCallManager();
+    $apiManager = new ApiCallManager();
     $page = $request->query->getInt('page', 1);
-    return $app['twig']->render('story.html.twig', $result->getNewStories());
+    return $app['twig']->render('story.html.twig', $apiManager->getNewStories($page));
 })
 ->bind('story');
 
-// Define controllers for comment
+// Define controllers for comment page
 $comment = $app['controllers_factory'];
 $comment->get('/', function (Request $request) use ($app) {
-    $result = new ApiCallManager();
+    $apiManager = new ApiCallManager();
     $page = $request->query->getInt('page', 1);
-    return $app['twig']->render('comment.html.twig', $result->getAllComments());
+    return $app['twig']->render('comment.html.twig', $apiManager->getAllComments());
 })
 ->bind('comment');
 
-// Define controllers for job
+// Define controllers for job page
 $job = $app['controllers_factory'];
-$job->get('/', function ($page) use ($app) {
-    $result = new ApiCallManager();
-    return $app['twig']->render('job.html.twig', array(
-        'results' => $result->listAllJobs($page)
-    ));
-});
+$job->get('/', function (Request $request) use ($app) {
+    $apiManager = new ApiCallManager();
+    $page = $request->query->getInt('page', 1);
+    return $app['twig']->render('job.html.twig', $apiManager->getJobs($page));
+})
+->bind('job');
 
-// Define controllers for ask stories
+// Define controllers for ask stories page
 $ask = $app['controllers_factory'];
-$ask->get('/', function ($page) use ($app) {
-    $result = new ApiCallManager();
-    return $app['twig']->render('ask.html.twig', array(
-        'results' => $result->listAllAskStories($page)
-    ));
-});
+$ask->get('/', function (Request $request) use ($app) {
+    $apiManager = new ApiCallManager();
+    $page = $request->query->getInt('page', 1);
+    return $app['twig']->render('ask.html.twig', $apiManager->getAskStories($page));
+})
+->bind('ask');
 
+// Define controllers for question page
 $question = $app['controllers_factory'];
 $question->get('/', function ($id) use ($app) {
-    $result = new ApiCallManager();
+    $apiManager = new ApiCallManager();
     return $app['twig']->render('question.html.twig', array(
-        'results' => $result->listAllComments($id)
+        'results' => $apiManager->listAllComments($id)
     ));
 });
 
 // Define controllers for show stories
 $show = $app['controllers_factory'];
-$show->get('/', function ($page) use ($app) {
-    $result = new ApiCallManager();
-    return $app['twig']->render('show.html.twig', array(
-        'results' => $result->listAllShowStories($page)
-    ));
-});
+$show->get('/', function (Request $request) use ($app) {
+    $apiManager = new ApiCallManager();
+    $page = $request->query->getInt('page', 1);
+    return $app['twig']->render('show.html.twig', $apiManager->getShowStories($page));
+})
+->bind('show');
 
 // Defines controllers for user
 $user = $app['controllers_factory'];
 $user->get('/', function ($id) use ($app) {
-    $result = new ApiCallManager();
+    $apiManager = new ApiCallManager();
     return $app['twig']->render('user.html.twig', array(
-        'result' => $result->getUserInfo($id)
+        'result' => $apiManager->getUserInfo($id)
     ));
 })
 ->bind('user');
 
-$app->mount('/story/{$page}', $story);
-$app->mount('/comment/{$page}', $comment);
-$app->mount('/job/{$page}', $job);
-$app->mount('/ask/{$page}', $ask);
-$app->mount('/show/{$page}', $show);
+$app->mount('/story', $story);
+$app->mount('/comment', $comment);
+$app->mount('/job', $job);
+$app->mount('/ask', $ask);
+$app->mount('/show', $show);
 $app->mount('/user/{id}', $user);
 $app->mount('/asking/{id}', $asking);
 $app->mount('/question/{id}', $question);

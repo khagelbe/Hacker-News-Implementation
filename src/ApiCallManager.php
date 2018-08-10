@@ -1,20 +1,42 @@
 <?php
 
 class ApiCallManager
-
-// Loading takes too much time. Fix it.
 {  
     // Number of item shown in one page
     const NO_OF_ITEMS = 25;
+    const BASE_URL = 'https://hacker-news.firebaseio.com/v0/%s.json';
 
     /** 
      * Gets all new storiy ids from Hacker News 
      */
-    public function getNewStories(): array
-    {      
-        $str = file_get_contents('https://hacker-news.firebaseio.com/v0/newstories.json');
-        return $this->paginatedResult($str);
+    public function getNewStories(int $page): array
+    {    
+        return $this->paginatedResult('newstories', $page);
     }    
+
+    /** 
+     * Gets all job story ids from Hacker News
+     */
+    public function getJobStories($page): array
+    {      
+        return $this->paginatedResult('jobstories', $page);
+    }
+
+    /** 
+     * Gets all ask story ids from Hacker News
+     */
+    public function getAskStories(int $page): array
+    {      
+        return $this->paginatedResult('askstories', $page);
+    }
+
+     /** 
+     * Gets all show story ids from Hacker News
+     */
+    public function getShowStories(int $page): array
+    {      
+        return $this->paginatedResult('showstories', $page);
+    }
 
     /**
      * Get all comments
@@ -36,48 +58,6 @@ class ApiCallManager
         ];
     }    
 
-    /** 
-     * List all jobs in detail
-     */
-    public function listAllJobs(): array
-    {
-        $resultArray = [];
-        $jobsArray = $this->getJobStories();    
-
-        return $this->getDetails($jobsArray);
-    }
-
-    /** 
-     * List all ask stories in detail
-     */
-    public function listAllAskStories(): array
-    {
-        $resultArray = [];
-        $askStoryArray = $this->getAskStories();    
-
-        return $this->getDetails($askStoryArray);
-    }
-
-    /** 
-     * Lists all show stories in detail
-     */
-    public function listAllShowStories(): array
-    {
-        $resultArray = [];
-        $showStoryArray = $this->getShowStories();    
-
-        return $this->getDetails($showStoryArray);
-    }
-
-    /**
-     * Fetches info about ask
-     */
-    public function getAskDetails(string $itemId): array
-    {
-        $str = file_get_contents(sprintf('https://hacker-news.firebaseio.com/v0/item/%s.json', $itemId));
-        return $this->jsonDecode($str);
-    }
-
     /**
      * Fetches user info
      */
@@ -86,34 +66,7 @@ class ApiCallManager
         $str = file_get_contents(sprintf('https://hacker-news.firebaseio.com/v0/user/%s.json', $userId));
         
         return $this->jsonDecode($str);       
-    }
-
-    /** 
-     * Gets all ask story ids from Hacker News
-     */
-    private function getAskStories(): array
-    {      
-        $str = file_get_contents('https://hacker-news.firebaseio.com/v0/askstories.json');
-        return $this->jsonDecode($str);
-    }
-
-    /** 
-     * Gets all show story ids from Hacker News
-     */
-    private function getShowStories(): array
-    {      
-        $str = file_get_contents('https://hacker-news.firebaseio.com/v0/showstories.json');
-        return $this->jsonDecode($str);
-    }
-
-    /** 
-     * Gets all job story ids from Hacker News
-     */
-    private function getJobStories(): array
-    {      
-        $str = file_get_contents('https://hacker-news.firebaseio.com/v0/jobstories.json');
-        return $this->jsonDecode($str);
-    }
+    } 
 
     private function getUser($userId): array
     {      
@@ -140,23 +93,27 @@ class ApiCallManager
         return $comments;
     }
 
+    //** Handles all item id's and makes urls */
+    private function getAllItemUrls($itemId)
+    { 
+        return sprintf('https://hacker-news.firebaseio.com/v0/item/%s.json', $itemId);
+    }
+
     /**
      * Gets info and paginates it
      */
-    private function paginatedResult(string $str): array
+    private function paginatedResult(string $url, int $page): array
     {
+        $str = file_get_contents(sprintf(self::BASE_URL, $url));
         $arr = $this->jsonDecode($str);
-        $page = isset($_GET['page']) ? $_GET['page'] : 1;
         $totalNumberOfItems = count($arr);
         $perPage = self::NO_OF_ITEMS;
         $totalNuberOfPages = $totalNumberOfItems / $perPage;
         $offset = $page <= 1 ? 0 : ($page - 1) * $perPage;
         
         $newIdArray = array_slice( $arr, $offset, $perPage );
-
-        $resultUrls = array_map($this->getAllItemUrls(), $arr);
-
-        $comments = $this->getItemDetails($resultUrls);
+        $resultUrls = array_map([$this, 'getAllItemUrls'], $newIdArray);
+        $itemDetails = $this->getItemDetails($resultUrls);
 
         return [
             'results' => $itemDetails,
@@ -165,11 +122,27 @@ class ApiCallManager
         ];
     }
 
-    //** Handles all item id's and makes urls */
-    private function getAllItemUrls($itemId)
+    /**
+     * Gets info and paginates it
+     */
+    private function paginatedJobResults(string $pageName, int $page): array
     {
-        $url = sprintf('https://hacker-news.firebaseio.com/v0/item/%s.json', $itemId);
-        return $url; 
+        $str = sprintf(self::BASE_URL, $pageName);
+        $arr = $this->jsonDecode($str);
+        $totalNumberOfItems = count($arr);
+        $perPage = self::NO_OF_ITEMS;
+        $totalNuberOfPages = $totalNumberOfItems / $perPage;
+        $offset = $page <= 1 ? 0 : ($page - 1) * $perPage;
+        
+        $newIdArray = array_slice( $arr, $offset, $perPage );
+        $resultUrls = array_map([$this, 'getAllItemUrls'], $newIdArray);
+        $itemDetails = $this->getItemDetails($resultUrls);
+
+        return [
+            'results' => $itemDetails,
+            'page' => $page,
+            'maxPages' => $totalNuberOfPages
+        ];
     }
 
     /**
@@ -195,9 +168,9 @@ class ApiCallManager
         } while ($running > 0);
 
         for ($i = 0; $i < $arr_count; $i++) {
-            $results[] = curl_multi_getcontent($curlArr[$i]);
+            $results[] = $this->jsonDecode(curl_multi_getcontent($curlArr[$i]));
         }
-        //print_r($results);
+
         return $results;
     }
 }

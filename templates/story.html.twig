@@ -17,7 +17,7 @@
                                 {% if result['descendants'] == 0 %}
                                     discuss
                                 {% else %}    
-                                    <a href="{{ url('comment', {id: result['id'] }) }}">{{ result['descendants'] }}</a> comments
+                                    {{ result['descendants'] }} comments
                                 {% endif %}    
                             </div>
                         </td>
@@ -33,7 +33,5 @@
             {% endfor %}
         </tbody>
     </table>
-    <div class="text-center">
-        {% include 'pagination.html.twig' %}
-    </div>
+    {% include 'pagination.html.twig' with {'page': page, 'maxPages': maxPages, 'pageName': 'story'} %}
 {% endblock %}
