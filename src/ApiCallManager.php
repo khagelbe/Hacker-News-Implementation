@@ -13,24 +13,26 @@ class ApiCallManager
     public function getNewStories(): array
     {      
         $str = file_get_contents('https://hacker-news.firebaseio.com/v0/newstories.json');
-        $arr = $this->jsonDecode($str);
+        return $this->paginatedResult($str);
+    }    
 
-        $page = isset($_GET['page']) ? $_GET['page'] : 1;
-        $totalNumberOfItems = count($arr);
-        $perPage = self::NO_OF_ITEMS;
-        $totalNuberOfPages = $totalNumberOfItems / $perPage;
-        $offset = $page <= 1 ? 0 : ($page - 1) * $perPage;
+    /**
+     * Get all comments
+     */
+    public function getAllComments(): array
+    {      
+        $str = file_get_contents('https://hacker-news.firebaseio.com/v0/newstories.json');
         
-        $newIdArray = array_slice( $arr, $offset, $perPage );
+        $arr = $this->paginatedResult($str);
 
-        $resultUrls = array_map($this->getAllItemUrls(), $arr);
+        $itemDetails = $arr['results'];
 
-        $itemDetails = $this->getItemDetails($resultUrls);
+        $comments = array_map($this->getComments, $itemDetails);
 
         return [
-            'results' => $itemDetails,
-            'page' => $page,
-            'maxPages' => $totalNuberOfPages
+            'comments' => $comments,
+            'page' => $arr['page'],
+            'maxPages' => $arr['totalNuberOfPages']
         ];
     }    
 
@@ -86,35 +88,6 @@ class ApiCallManager
         return $this->jsonDecode($str);       
     }
 
-    /**
-     * Gets info of one single item
-     * Solution was found from: https://stackoverflow.com/questions/9308779/php-parallel-curl-requests
-     * Normal looping doesn't work because it's too slow 
-     */
-    private function getItemDetails($arr) {
-        $arr_count = count($arr);
-
-        $curlArr = [];
-        $master = curl_multi_init();
-
-        for ($i = 0; $i < $arr_count; $i++) {
-            $url = $arr[$i];
-            $curlArr[$i] = curl_init($url);
-            curl_setopt($curlArr[$i], CURLOPT_RETURNTRANSFER, true);
-            curl_multi_add_handle($master, $curlArr[$i]);
-        }
-
-        do {
-            curl_multi_exec($master, $running);
-        } while ($running > 0);
-
-        for ($i = 0; $i < $arr_count; $i++) {
-            $results[] = curl_multi_getcontent($curlArr[$i]);
-        }
-        //print_r($results);
-        return $results;
-    }
-
     /** 
      * Gets all ask story ids from Hacker News
      */
@@ -157,6 +130,9 @@ class ApiCallManager
         return json_decode($str, true);
     }
 
+    /**
+     * Gets comments of one item
+     */
     private function getComments($item)
     {
         $comments = $item['kids'];
@@ -164,10 +140,64 @@ class ApiCallManager
         return $comments;
     }
 
+    /**
+     * Gets info and paginates it
+     */
+    private function paginatedResult(string $str): array
+    {
+        $arr = $this->jsonDecode($str);
+        $page = isset($_GET['page']) ? $_GET['page'] : 1;
+        $totalNumberOfItems = count($arr);
+        $perPage = self::NO_OF_ITEMS;
+        $totalNuberOfPages = $totalNumberOfItems / $perPage;
+        $offset = $page <= 1 ? 0 : ($page - 1) * $perPage;
+        
+        $newIdArray = array_slice( $arr, $offset, $perPage );
+
+        $resultUrls = array_map($this->getAllItemUrls(), $arr);
+
+        $comments = $this->getItemDetails($resultUrls);
+
+        return [
+            'results' => $itemDetails,
+            'page' => $page,
+            'maxPages' => $totalNuberOfPages
+        ];
+    }
+
     //** Handles all item id's and makes urls */
     private function getAllItemUrls($itemId)
     {
         $url = sprintf('https://hacker-news.firebaseio.com/v0/item/%s.json', $itemId);
         return $url; 
+    }
+
+    /**
+     * Gets info of one single item
+     * Solution was found from: https://stackoverflow.com/questions/9308779/php-parallel-curl-requests
+     * Normal looping doesn't work because it's too slow 
+     */
+    private function getItemDetails($arr) {
+        $arr_count = count($arr);
+
+        $curlArr = [];
+        $master = curl_multi_init();
+
+        for ($i = 0; $i < $arr_count; $i++) {
+            $url = $arr[$i];
+            $curlArr[$i] = curl_init($url);
+            curl_setopt($curlArr[$i], CURLOPT_RETURNTRANSFER, true);
+            curl_multi_add_handle($master, $curlArr[$i]);
+        }
+
+        do {
+            curl_multi_exec($master, $running);
+        } while ($running > 0);
+
+        for ($i = 0; $i < $arr_count; $i++) {
+            $results[] = curl_multi_getcontent($curlArr[$i]);
+        }
+        //print_r($results);
+        return $results;
     }
 }

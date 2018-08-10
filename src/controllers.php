@@ -34,12 +34,12 @@ $story->get('/', function (Request $request) use ($app) {
 
 // Define controllers for comment
 $comment = $app['controllers_factory'];
-$comment->get('/', function ($page) use ($app) {
+$comment->get('/', function (Request $request) use ($app) {
     $result = new ApiCallManager();
-    return $app['twig']->render('comment.html.twig', array(
-        'results' => $result->listAllNewStories($page)
-    ));
-});
+    $page = $request->query->getInt('page', 1);
+    return $app['twig']->render('comment.html.twig', $result->getAllComments());
+})
+->bind('comment');
 
 // Define controllers for job
 $job = $app['controllers_factory'];
