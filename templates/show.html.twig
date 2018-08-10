@@ -11,9 +11,9 @@
                             <a href="{{ result['url'] }}">{{ result['title'] }}</a>
                             <div id="small-text">
                                 {{ result['score'] }} point by 
-                                <a href="{{ url('user', {id: result['id'] }) }}">{{ result['by'] }}</a>
-                                | {{ (result['time'] | date) |time_diff}}
-                                | web |
+                                <a href="{{ url('user', {id: result['id'] }) }}">{{ result['by'] }}</a> |
+                                {{ (result['time'] | date) |time_diff}} |
+                                <a href="https://www.google.com/search?q={{ result['title'] | url_encode }}">web</a> |
                                 {% if result['descendants'] == 0 %}
                                     discuss
                                 {% else %}    
