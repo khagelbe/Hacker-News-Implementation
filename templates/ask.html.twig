@@ -16,7 +16,7 @@
                             {% if result['descendants'] == 0 %}
                                 discuss
                             {% else %}    
-                                {{ result['descendants'] }} comments
+                                <a href="{{ url('comment', {id: result['id'] }) }}">{{ result['descendants'] }}</a> comments
                             {% endif %}    
                         </div>
                     </td>

@@ -17,7 +17,7 @@ $app->get('/', function () use ($app) {
 $asking = $app['controllers_factory'];
 $asking->get('/', function ($id) use ($app) {
     $result = new ApiCallManager();
-    return $app['twig']->render('ask_read.html.twig', array(
+    return $app['twig']->render('question.html.twig', array(
         'result' => $result->getAskDetails($id)
     ));
 })
@@ -59,6 +59,14 @@ $ask->get('/', function ($page) use ($app) {
     ));
 });
 
+$question = $app['controllers_factory'];
+$question->get('/', function ($id) use ($app) {
+    $result = new ApiCallManager();
+    return $app['twig']->render('question.html.twig', array(
+        'results' => $result->listAllComments($id)
+    ));
+});
+
 // Define controllers for show stories
 $show = $app['controllers_factory'];
 $show->get('/', function ($page) use ($app) {
@@ -85,6 +93,7 @@ $app->mount('/ask/{$page}', $ask);
 $app->mount('/show/{$page}', $show);
 $app->mount('/user/{id}', $user);
 $app->mount('/asking/{id}', $asking);
+$app->mount('/question/{id}', $question);
 
 $app->error(function (\Exception $e, Request $request, $code) use ($app) {
     if ($app['debug']) {
