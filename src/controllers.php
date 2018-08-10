@@ -28,9 +28,7 @@ $story = $app['controllers_factory'];
 $story->get('/', function (Request $request) use ($app) {
     $result = new ApiCallManager();
     $page = $request->query->getInt('page', 1);
-    return $app['twig']->render('story.html.twig', array(
-        'results' => $result->listAllNewStories($page)
-    ));
+    return $app['twig']->render('story.html.twig', $result->getNewStories());
 })
 ->bind('story');
 

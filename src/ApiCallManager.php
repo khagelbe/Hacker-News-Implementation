@@ -7,23 +7,32 @@ class ApiCallManager
     // Number of item shown in one page
     const NO_OF_ITEMS = 25;
 
-    public function createPagination()
-    {
-        $page = $_GET['page'];
-        $offset = ($page-1) * self::NO_OF_ITEMS;
-        $totalNuberOfPages = $totalNumberOfPages / self::NO_OF_ITEMS;
-    }
-
-    /**
-     * Lists all new stories in detail
+    /** 
+     * Gets all new storiy ids from Hacker News 
      */
-    public function listAllNewStories($page): array
-    {
-        $resultArray = [];
-        $newsArray = $this->getNewStories();    
+    public function getNewStories(): array
+    {      
+        $str = file_get_contents('https://hacker-news.firebaseio.com/v0/newstories.json');
+        $arr = $this->jsonDecode($str);
 
-        return $this->getDetails($newsArray);
-    }
+        $page = isset($_GET['page']) ? $_GET['page'] : 1;
+        $totalNumberOfItems = count($arr);
+        $perPage = self::NO_OF_ITEMS;
+        $totalNuberOfPages = $totalNumberOfItems / $perPage;
+        $offset = $page <= 1 ? 0 : ($page - 1) * $perPage;
+        
+        $newIdArray = array_slice( $arr, $offset, $perPage );
+
+        $resultUrls = array_map($this->getAllItemUrls(), $arr);
+
+        $itemDetails = $this->getItemDetails($resultUrls);
+
+        return [
+            'results' => $itemDetails,
+            'page' => $page,
+            'maxPages' => $totalNuberOfPages
+        ];
+    }    
 
     /** 
      * List all jobs in detail
@@ -77,26 +86,33 @@ class ApiCallManager
         return $this->jsonDecode($str);       
     }
 
-    /** 
-     * Gets all new storiy ids from Hacker News 
-     * 
+    /**
+     * Gets info of one single item
+     * Solution was found from: https://stackoverflow.com/questions/9308779/php-parallel-curl-requests
+     * Normal looping doesn't work because it's too slow 
      */
-    private function getNewStories(): array
-    {      
-        $str = file_get_contents('https://hacker-news.firebaseio.com/v0/newstories.json');
+    private function getItemDetails($arr) {
+        $arr_count = count($arr);
 
-        $arr = $this->jsonDecode($str);
+        $curlArr = [];
+        $master = curl_multi_init();
 
-        $i = 0;
-        
-        foreach($arr as $item) {
-            $resultArray[] = $item;
-            $i++;
-
-            if ($i>= self::NO_OF_ITEMS) {
-                return $resultArray;
-            }
+        for ($i = 0; $i < $arr_count; $i++) {
+            $url = $arr[$i];
+            $curlArr[$i] = curl_init($url);
+            curl_setopt($curlArr[$i], CURLOPT_RETURNTRANSFER, true);
+            curl_multi_add_handle($master, $curlArr[$i]);
         }
+
+        do {
+            curl_multi_exec($master, $running);
+        } while ($running > 0);
+
+        for ($i = 0; $i < $arr_count; $i++) {
+            $results[] = curl_multi_getcontent($curlArr[$i]);
+        }
+        //print_r($results);
+        return $results;
     }
 
     /** 
@@ -130,20 +146,7 @@ class ApiCallManager
     {      
         $str = file_get_contents(sprintf('https://hacker-news.firebaseio.com/v0/user/%s.json', $userId));
         return $this->jsonDecode($str);
-    }
-
-    /**
-     * Loops all ids from given array and returns item information
-     */
-    private function getDetails($arr): array
-    {
-        foreach ($arr as $itemId) {
-            
-            $str = file_get_contents(sprintf('https://hacker-news.firebaseio.com/v0/item/%s.json', $itemId)); 
-            $resultArray[] = json_decode($str, true);
-        }
-
-        return $resultArray;
+        //array_filter
     }
 
     /**
@@ -152,5 +155,19 @@ class ApiCallManager
     private function jsonDecode(string $str): ?array
     {
         return json_decode($str, true);
+    }
+
+    private function getComments($item)
+    {
+        $comments = $item['kids'];
+
+        return $comments;
+    }
+
+    //** Handles all item id's and makes urls */
+    private function getAllItemUrls($itemId)
+    {
+        $url = sprintf('https://hacker-news.firebaseio.com/v0/item/%s.json', $itemId);
+        return $url; 
     }
 }
