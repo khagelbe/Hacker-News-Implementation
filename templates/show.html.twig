@@ -1,12 +1,11 @@
 {% extends "layout.html.twig" %}
 
 {% block content %} 
-    <table id="jobs" class="table table-bordred table-striped">
+    <table class="table table-bordred table-striped">
         <tbody>
             {% for result in results %}
                 {% if result['url'] is defined %}
                     <tr>
-                        <td></td>
                         <td>
                             <a href="{{ result['url'] }}">{{ result['title'] }}</a>
                             <div id="small-text">
@@ -24,11 +23,10 @@
                     </tr>
                 {% elseif result['type'] == 'ask' %}
                     <<tr>
-                    <td></td>
-                    <td>
-                        <a href="{{ url('ask', {id: result['id'] }) }}">{{ result['title'] }}</a>
-                    </td>
-                </tr>
+                        <td>
+                            <a href="{{ url('ask', {id: result['id'] }) }}">{{ result['title'] }}</a>
+                        </td>
+                    </tr>
                 {% endif %}
             {% endfor %}
         </tbody>

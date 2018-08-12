@@ -1,12 +1,11 @@
 {% extends "layout.html.twig" %}
 
 {% block content %} 
-    <table id="jobs" class="table table-bordred table-striped">
+    <table class="table table-bordred table-striped">
         <tbody>
             {% for result in results %}
                 {% if result['url'] is defined %}
                     <tr>
-                        <td></td>
                         <td>
                             <a href="{{ result['url'] }}">{{ result['title'] }}</a>
                             <div id="small-text">{{ (result['time'] | date) |time_diff}}</div>
@@ -14,7 +13,6 @@
                     </tr>
                 {% else %}
                     <tr>
-                        <td></td>
                         <td>
                             {{ result['title'] }}
                             <div id="small-text">2 hours ago</div>

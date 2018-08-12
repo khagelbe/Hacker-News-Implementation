@@ -1,11 +1,10 @@
 {% extends "layout.html.twig" %}
 
 {% block content %} 
-    <table id="jobs" class="table table-bordred table-striped">
+    <table class="table table-bordred table-striped">
         <tbody>
             {% for result in results %}
                 <tr>
-                    <td></td>
                     <td>
                         <a href="{{ url('ask', {id: result['id'] }) }}">{{ result['title'] }}</a>
                         <div id="small-text">

@@ -4,10 +4,15 @@ class ApiCallManager
 {  
     // Number of item shown in one page
     const NO_OF_ITEMS = 25;
+
+    // Base url for all get requests
     const BASE_URL = 'https://hacker-news.firebaseio.com/v0/%s.json';
 
     /** 
      * Gets all new storiy ids from Hacker News 
+     * 
+     * @param int $page
+     * @return array
      */
     public function getNewStories(int $page): array
     {    
@@ -16,6 +21,9 @@ class ApiCallManager
 
     /** 
      * Gets all job story ids from Hacker News
+     * 
+     * @param int $page
+     * @return array
      */
     public function getJobStories($page): array
     {      
@@ -24,6 +32,9 @@ class ApiCallManager
 
     /** 
      * Gets all ask story ids from Hacker News
+     * 
+     * @param int $page
+     * @return array
      */
     public function getAskStories(int $page): array
     {      
@@ -32,6 +43,9 @@ class ApiCallManager
 
      /** 
      * Gets all show story ids from Hacker News
+     * 
+     * @param int $page
+     * @return array
      */
     public function getShowStories(int $page): array
     {      
@@ -40,8 +54,11 @@ class ApiCallManager
 
     /**
      * Info of one item including kids
+     * 
+     * @param int $id
+     * @return array
      */
-    public function getItem($id)
+    public function getItem(int $id): array
     {
         $str = file_get_contents(sprintf('https://hacker-news.firebaseio.com/v0/item/%s.json', $id));
         $details = json_decode($str, true); // Item details
@@ -57,7 +74,26 @@ class ApiCallManager
     }
 
     /**
+     * Fetches user info
+     * 
+     * @param string $userId
+     * @return array
+     */
+    public function getUserInfo(string $userId): ?array
+    {
+        $str = file_get_contents(sprintf('https://hacker-news.firebaseio.com/v0/user/%s.json', $userId));
+        $result = json_decode($str, true); 
+        
+        return [
+            'result' => $result
+        ]; 
+    } 
+
+    /**
      * Checks kids
+     * 
+     * @param array $details
+     * @return array
      */
     private function checkItemKids(array $details): array  
     { 
@@ -74,32 +110,23 @@ class ApiCallManager
         return $kidsContents; die;
     }  
 
-    private function getKids($itemArray)
-    {
-        return isset($itemArray['kids']);
-    }
-
     /**
-     * Fetches user info
+     * Handles all item id's and makes urls
+     * 
+     * @param int $itemId
+     * @return array
      */
-    public function getUserInfo(string $userId): ?array
-    {
-        $str = file_get_contents(sprintf('https://hacker-news.firebaseio.com/v0/user/%s.json', $userId));
-        $result = json_decode($str, true); 
-        
-        return [
-            'result' => $result
-        ]; 
-    } 
-
-    //** Handles all item id's and makes urls */
-    private function getItemUrl($itemId)
+    private function getItemUrl(int $itemId)
     { 
         return sprintf('https://hacker-news.firebaseio.com/v0/item/%s.json', $itemId);
     }
 
     /**
      * Gets info and paginates it
+     * 
+     * @param string $url
+     * @param int $page
+     * @return array
      */
     private function paginatedResult(string $url, int $page): array
     {
@@ -125,8 +152,12 @@ class ApiCallManager
      * Gets info of one single item
      * Solution was found from: https://stackoverflow.com/questions/9308779/php-parallel-curl-requests
      * Normal looping doesn't work because it's too slow 
+     * 
+     * @param array $arr
+     * @return array
      */
-    private function getItemDetails($arr) {
+    private function getItemDetails(array $arr): array
+    {
         $arr_count = count($arr);
 
         $curlArr = [];
