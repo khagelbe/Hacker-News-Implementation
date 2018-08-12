@@ -3,10 +3,10 @@
 class ApiCallManager
 {  
     // Number of item shown in one page
-    const NO_OF_ITEMS = 25;
+    private const NO_OF_ITEMS = 25;
 
     // Base url for all get requests
-    const BASE_URL = 'https://hacker-news.firebaseio.com/v0/%s.json';
+    private const BASE_URL = 'https://hacker-news.firebaseio.com/v0/%s.json';
 
     /** 
      * Gets all new storiy ids from Hacker News 
