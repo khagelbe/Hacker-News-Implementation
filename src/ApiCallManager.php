@@ -39,24 +39,45 @@ class ApiCallManager
     }
 
     /**
-     * Get all comments
+     * Info of one item including kids
      */
-    public function getAllComments(): array
-    {      
-        $str = file_get_contents('https://hacker-news.firebaseio.com/v0/newstories.json');
-        
-        $arr = $this->paginatedResult($str);
+    public function getItem($id)
+    {
+        $str = file_get_contents(sprintf('https://hacker-news.firebaseio.com/v0/item/%s.json', $id));
+        $details = json_decode($str, true); // Item details
 
-        $itemDetails = $arr['results'];
-
-        $comments = array_map($this->getComments, $itemDetails);
+        $kidsContents = [];
+        if (array_key_exists('kids', $details) && !empty($details['kids'])) {
+            $details['kids'] = $this->checkItemKids($details, 0);
+        }
 
         return [
-            'comments' => $comments,
-            'page' => $arr['page'],
-            'maxPages' => $arr['totalNuberOfPages']
+            'result' => $details
         ];
-    }    
+    }
+
+    /**
+     * Checks kids
+     */
+    private function checkItemKids(array $details): array  
+    { 
+        $kids = $details['kids'];  // Array of kids of item       
+        $resultUrls = array_map([$this, 'getItemUrl'], $kids);
+        $kidsContents = $this->getItemDetails($resultUrls); // Array of kids details of one main item
+        
+        foreach ($kidsContents as &$content) {
+            if (array_key_exists('kids', $content) && !empty($content['kids'])) {
+                $content['kids'] = $this->checkItemKids($content);
+            }
+        }
+
+        return $kidsContents; die;
+    }  
+
+    private function getKids($itemArray)
+    {
+        return isset($itemArray['kids']);
+    }
 
     /**
      * Fetches user info
@@ -64,37 +85,15 @@ class ApiCallManager
     public function getUserInfo(string $userId): ?array
     {
         $str = file_get_contents(sprintf('https://hacker-news.firebaseio.com/v0/user/%s.json', $userId));
+        $result = json_decode($str, true); 
         
-        return $this->jsonDecode($str);       
+        return [
+            'result' => $result
+        ]; 
     } 
 
-    private function getUser($userId): array
-    {      
-        $str = file_get_contents(sprintf('https://hacker-news.firebaseio.com/v0/user/%s.json', $userId));
-        return $this->jsonDecode($str);
-        //array_filter
-    }
-
-    /**
-     * Decodes json string to array
-     */
-    private function jsonDecode(string $str): ?array
-    {
-        return json_decode($str, true);
-    }
-
-    /**
-     * Gets comments of one item
-     */
-    private function getComments($item)
-    {
-        $comments = $item['kids'];
-
-        return $comments;
-    }
-
     //** Handles all item id's and makes urls */
-    private function getAllItemUrls($itemId)
+    private function getItemUrl($itemId)
     { 
         return sprintf('https://hacker-news.firebaseio.com/v0/item/%s.json', $itemId);
     }
@@ -105,37 +104,14 @@ class ApiCallManager
     private function paginatedResult(string $url, int $page): array
     {
         $str = file_get_contents(sprintf(self::BASE_URL, $url));
-        $arr = $this->jsonDecode($str);
+        $arr = json_decode($str, true);
         $totalNumberOfItems = count($arr);
         $perPage = self::NO_OF_ITEMS;
-        $totalNuberOfPages = $totalNumberOfItems / $perPage;
+        $totalNuberOfPages = ceil($totalNumberOfItems / $perPage);
         $offset = $page <= 1 ? 0 : ($page - 1) * $perPage;
         
         $newIdArray = array_slice( $arr, $offset, $perPage );
-        $resultUrls = array_map([$this, 'getAllItemUrls'], $newIdArray);
-        $itemDetails = $this->getItemDetails($resultUrls);
-
-        return [
-            'results' => $itemDetails,
-            'page' => $page,
-            'maxPages' => $totalNuberOfPages
-        ];
-    }
-
-    /**
-     * Gets info and paginates it
-     */
-    private function paginatedJobResults(string $pageName, int $page): array
-    {
-        $str = sprintf(self::BASE_URL, $pageName);
-        $arr = $this->jsonDecode($str);
-        $totalNumberOfItems = count($arr);
-        $perPage = self::NO_OF_ITEMS;
-        $totalNuberOfPages = $totalNumberOfItems / $perPage;
-        $offset = $page <= 1 ? 0 : ($page - 1) * $perPage;
-        
-        $newIdArray = array_slice( $arr, $offset, $perPage );
-        $resultUrls = array_map([$this, 'getAllItemUrls'], $newIdArray);
+        $resultUrls = array_map([$this, 'getItemUrl'], $newIdArray);
         $itemDetails = $this->getItemDetails($resultUrls);
 
         return [
@@ -167,8 +143,12 @@ class ApiCallManager
             curl_multi_exec($master, $running);
         } while ($running > 0);
 
+        $results = [];
         for ($i = 0; $i < $arr_count; $i++) {
-            $results[] = $this->jsonDecode(curl_multi_getcontent($curlArr[$i]));
+            $content = json_decode(curl_multi_getcontent($curlArr[$i]), true);
+            if (!isset($content['deleted'])) {
+                $results[] = $content;
+            }           
         }
 
         return $results;

@@ -7,21 +7,22 @@
                 <tr>
                     <td></td>
                     <td>
-                        <a href="{{ url('asking', {id: result['id'] }) }}">{{ result['title'] }}</a>
+                        <a href="{{ url('ask', {id: result['id'] }) }}">{{ result['title'] }}</a>
                         <div id="small-text">
                             {{ result['score'] }} point by 
                             <a href="{{ url('user', {id: result['id'] }) }}">{{ result['by'] }}</a> |
                             {{ (result['time'] | date) |time_diff}} |
                             web |
                             {% if result['descendants'] == 0 %}
-                                discuss
+                                <a href="{{ url('read_item', {id: result['id'] }) }}">discuss</a>
                             {% else %}    
-                                <a href="{{ url('comment', {id: result['id'] }) }}">{{ result['descendants'] }}</a> comments
-                            {% endif %}    
+                                <a href="{{ url('read_item', {id: result['id'] }) }}">{{ result['kids']|length }} comments</a>
+                            {% endif %}     
                         </div>
                     </td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
+    {% include 'pagination.html.twig' with {'page': page, 'maxPages': maxPages, 'pageName': 'ask'} %}
 {% endblock %}

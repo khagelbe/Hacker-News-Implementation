@@ -5,39 +5,33 @@
     {% if result is empty %}
         <div>
             No user data available
-        </div>  
-            
+        </div>              
     {% else %}        
-        <table>
-        <tr>
-            <td>
-                User:
-            </td>
-            <td>
-                {{ result['karma'] }}
-            </td>    
-        </tr> 
-        <tr>
-            <td>
-                Created:
-            </td>
-            <td>
-                {{ result['created'] }}
-            </td>    
-        </tr> 
-        <tr>
-            <td>
-                {{ result['karma'] }}
-            </td>    
-        </tr> 
-        <tr>
-            <td>
-                {{ result['karma'] }}
-            </td>    
-        </tr>  
-        <div>  
-            {{ result['created'] }}
-        </div> 
+        <table id="jobs" class="table table-bordred table-striped">
+            <tr>
+                <td>
+                    User:
+                </td>
+                <td>
+                    {{ result['id'] }}
+                </td>    
+            </tr> 
+            <tr>
+                <td>
+                    Created:
+                </td>
+                <td>
+                    {{ (result['created'] | date) | time_diff}}
+                </td>    
+            </tr> 
+            <tr>
+                <td>
+                    Karma:
+                </td>
+                <td>
+                    {{ result['karma'] }}
+                </td>    
+            </tr>        
         </table>         
     </div>    
     {% endif %}

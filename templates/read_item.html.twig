@@ -1,0 +1,52 @@
+{% extends "layout.html.twig" %}
+
+{% macro kids(kids) %}
+    {% import _self as macros %}
+    {% for kid in kids %}
+        <li>
+            <tr>
+                <div id="small-text"> 
+                    <a href="{{ url('user', {id: kid['id'] }) }}">{{ kid['by'] }}</a>
+                    {{ (kid['time'] | date) | time_diff}} 
+                </div>
+            </tr>
+            <tr>
+                <td></td>
+                <td>{{ kid['text']|raw }}</td>
+            </tr>
+            {% if kid['kids'] is defined %}
+                <ul>
+                    {{ macros.kids(kid['kids']) }}
+                </ul>
+            {% endif %}
+        </li>
+    {% endfor %}
+{% endmacro %}
+
+{% import _self as macros %}
+
+{% block content %}
+    <div id="item">
+        <div id="small-text">
+            {{ result['score'] }} point by 
+            <a href="{{ url('user', {id: result['id'] }) }}">{{ result['by'] }}</a> |
+            {{ (result['time'] | date) | time_diff}} |
+            <a href="https://www.google.com/search?q={{ result['title'] | url_encode }}">web</a> 
+        </div>
+        <div>  
+            {{ result['title'] }}
+        </div> 
+        <div>
+            <textarea name="text" rows="6" cols="60"></textarea>
+        </div>
+         <div>    
+            <button type="button" class="btn btn-primary">Submit</button>
+        </div>        
+        <div>
+            {% if result['kids'] is defined %}
+                {{ macros.kids(result['kids']) }}
+            {% endif %}    
+        </div>    
+    </div>    
+{% endblock %}
+

@@ -15,10 +15,10 @@
                                 {{ (result['time'] | date) |time_diff}} |
                                 <a href="https://www.google.com/search?q={{ result['title'] | url_encode }}">web</a> |
                                 {% if result['descendants'] == 0 %}
-                                    discuss
+                                    <a href="{{ url('read_item', {id: result['id'] }) }}">discuss</a>
                                 {% else %}    
-                                    {{ result['descendants'] }} comments
-                                {% endif %}    
+                                    <a href="{{ url('read_item', {id: result['id'] }) }}">{{ result['descendants'] }} comments</a>
+                                {% endif %}     
                             </div>
                         </td>
                     </tr>
@@ -26,11 +26,12 @@
                     <<tr>
                     <td></td>
                     <td>
-                        <a href="{{ url('asking', {id: result['id'] }) }}">{{ result['title'] }}</a>
+                        <a href="{{ url('ask', {id: result['id'] }) }}">{{ result['title'] }}</a>
                     </td>
                 </tr>
                 {% endif %}
             {% endfor %}
         </tbody>
     </table>
+    {% include 'pagination.html.twig' with {'page': page, 'maxPages': maxPages, 'pageName': 'show'} %}
 {% endblock %}

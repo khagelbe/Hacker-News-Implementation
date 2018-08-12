@@ -24,4 +24,5 @@
             {% endfor %}
         </tbody>
     </table>
+    {% include 'pagination.html.twig' with {'page': page, 'maxPages': maxPages, 'pageName': 'job'} %}
 {% endblock %}

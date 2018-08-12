@@ -13,16 +13,6 @@ $app->get('/', function () use ($app) {
 })
 ->bind('homepage');
 
-// define controllers for one question
-$asking = $app['controllers_factory'];
-$asking->get('/', function ($id) use ($app) {
-    $apiManager = new ApiCallManager();
-    return $app['twig']->render('question.html.twig', array(
-        'result' => $apiManager->getAskDetails($id)
-    ));
-})
-->bind('asking');
-
 // define controllers for new story page
 $story = $app['controllers_factory'];
 $story->get('/', function (Request $request) use ($app) {
@@ -32,21 +22,12 @@ $story->get('/', function (Request $request) use ($app) {
 })
 ->bind('story');
 
-// Define controllers for comment page
-$comment = $app['controllers_factory'];
-$comment->get('/', function (Request $request) use ($app) {
-    $apiManager = new ApiCallManager();
-    $page = $request->query->getInt('page', 1);
-    return $app['twig']->render('comment.html.twig', $apiManager->getAllComments());
-})
-->bind('comment');
-
 // Define controllers for job page
 $job = $app['controllers_factory'];
 $job->get('/', function (Request $request) use ($app) {
     $apiManager = new ApiCallManager();
     $page = $request->query->getInt('page', 1);
-    return $app['twig']->render('job.html.twig', $apiManager->getJobs($page));
+    return $app['twig']->render('job.html.twig', $apiManager->getJobStories($page));
 })
 ->bind('job');
 
@@ -59,14 +40,13 @@ $ask->get('/', function (Request $request) use ($app) {
 })
 ->bind('ask');
 
-// Define controllers for question page
-$question = $app['controllers_factory'];
-$question->get('/', function ($id) use ($app) {
+// Define controllers for read item page
+$readItem = $app['controllers_factory'];
+$readItem->get('/', function ($id) use ($app) {
     $apiManager = new ApiCallManager();
-    return $app['twig']->render('question.html.twig', array(
-        'results' => $apiManager->listAllComments($id)
-    ));
-});
+    return $app['twig']->render('read_item.html.twig', $apiManager->getItem($id));
+})
+->bind('read_item');
 
 // Define controllers for show stories
 $show = $app['controllers_factory'];
@@ -81,20 +61,16 @@ $show->get('/', function (Request $request) use ($app) {
 $user = $app['controllers_factory'];
 $user->get('/', function ($id) use ($app) {
     $apiManager = new ApiCallManager();
-    return $app['twig']->render('user.html.twig', array(
-        'result' => $apiManager->getUserInfo($id)
-    ));
+    return $app['twig']->render('user.html.twig', $apiManager->getUserInfo($id));
 })
 ->bind('user');
 
 $app->mount('/story', $story);
-$app->mount('/comment', $comment);
 $app->mount('/job', $job);
 $app->mount('/ask', $ask);
 $app->mount('/show', $show);
 $app->mount('/user/{id}', $user);
-$app->mount('/asking/{id}', $asking);
-$app->mount('/question/{id}', $question);
+$app->mount('/item/{id}', $readItem);
 
 $app->error(function (\Exception $e, Request $request, $code) use ($app) {
     if ($app['debug']) {
