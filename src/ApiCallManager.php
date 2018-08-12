@@ -158,12 +158,12 @@ class ApiCallManager
      */
     private function getItemDetails(array $arr): array
     {
-        $arr_count = count($arr);
+        $arrCount = count($arr);
 
         $curlArr = [];
         $master = curl_multi_init();
 
-        for ($i = 0; $i < $arr_count; $i++) {
+        for ($i = 0; $i < $arrCount; $i++) {
             $url = $arr[$i];
             $curlArr[$i] = curl_init($url);
             curl_setopt($curlArr[$i], CURLOPT_RETURNTRANSFER, true);
@@ -175,7 +175,7 @@ class ApiCallManager
         } while ($running > 0);
 
         $results = [];
-        for ($i = 0; $i < $arr_count; $i++) {
+        for ($i = 0; $i < $arrCount; $i++) {
             $content = json_decode(curl_multi_getcontent($curlArr[$i]), true);
             if (!isset($content['deleted'])) {
                 $results[] = $content;
